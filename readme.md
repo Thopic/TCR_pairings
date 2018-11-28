@@ -1,5 +1,6 @@
-# Supplementary to the paper XXXXX
+# Supplementary to the paper "Genesis of $\alpha$ $\beta$ T-cell receptor
 
+[https://www.biorxiv.org/content/early/2018/06/28/353128](Link to the paper (biorxiv)
 
 ## Find the pairs using a variation on PairSeq
 
