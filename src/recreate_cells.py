@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+
+""" Re-create the cells starting with the paired files
+    Take six mandatory arguments, the two files of sequences, the three
+    files containing pairs ab, aa and bb and the output file
+    Modify the list of sequences to add columns containing their paired
+    alphas/betas, the number of clones they are in...
+"""
+
+import argparse
+import scipy.special
+import pandas as pd
+import editdistance
+import numpy as np
+
+
+def comb(n, k):
+    """ Return n choose k 
+    """
+    return scipy.special.comb(n, k, exact=True)
+
+
+def log10pvalue(wxy, wx, wy, W):
+    """ return the logarithm_10 of the p-value,
+        The p-value (wx, wy, wxy) is the probability of randomly 
+        finding two sequences (x, y) in more than wxy shared wells
+        knowing that they were initially in wx and wu wells
+    """
+    return np.log10(sum([comb(wx, x)*comb(W-wx, wy-x)
+                for x in range(wxy, min(wx, wy)+1)])/comb(W, wy))
+
+
+def connected_components(neighbors):
+    """ Find the connected components of a graph,
+        in the form {a0: {a0, a1, a2, a3}, a1: {a0, a4}, ...}
+        Pilfered from: 
+        https://stackoverflow.com/questions/10301000/python-connected-components
+    """
+    seen = set()
+    def component(node):
+        nodes = set([node])
+        while nodes:
+            node = nodes.pop()
+            seen.add(node)
+            nodes |= neighbors[node] - seen
+            yield node
+    for node in neighbors:
+        if node not in seen:
+            yield component(node)
+
+
+def write_cells(filename_a, filename_b, filename_ab,
+                filename_aa, filename_bb, filename_output):
+    """ Main function
+        Rewrite the two sequences files
+        Create the cell file
+
+        The strategy to recreate cells is a glutton one,
+        The cells are the connected components of the graph of
+        sequences
+    """
+    
+    dfa = pd.read_csv(filename_a, sep="\t", index_col=False)
+    dfb = pd.read_csv(filename_b, sep="\t", index_col=False)
+
+    dfab = pd.read_csv(filename_ab, sep="\t", index_col=False)
+    dfaa = pd.read_csv(filename_aa, sep="\t", index_col=False)
+    dfbb = pd.read_csv(filename_bb, sep="\t", index_col=False)
+
+    print("Write the pairs in the files {} and {}".format(filename_a, filename_b))
+    
+    lsta = [set() for i in range(len(dfa))]
+    lstb = [set() for i in range(len(dfb))]
+    for x in np.array([dfab.index_1.values, dfab.index_2.values]).transpose():
+        lsta[x[0]].add(x[1])
+        lstb[x[1]].add(x[0])
+
+    dc_str_a = dict()
+    for xa in range(len(lsta)):
+        dc_str_a[xa] = ",".join([str(u) for u in lsta[xa]])
+    dc_str_b = dict()
+    for xb in range(len(lstb)):
+        dc_str_b[xb] = ",".join([str(u) for u in lstb[xb]])
+        
+        
+    dfa["paired_betas"] = dfa["index"].apply(lambda x: dc_str_a[x])
+    dfb["paired_alphas"] = dfb["index"].apply(lambda x: dc_str_b[x])
+
+
+    lsta = [set() for i in range(len(dfa))]
+    lstb = [set() for i in range(len(dfb))]
+    for x in np.array([dfaa.index_1.values, dfaa.index_2.values]).transpose():
+        lsta[x[1]].add(x[0])
+        lsta[x[0]].add(x[1])
+    for x in np.array([dfbb.index_1.values, dfbb.index_2.values]).transpose():
+        lstb[x[1]].add(x[0])
+        lstb[x[0]].add(x[1])
+
+    dc_str_a = dict()
+    for xa in range(len(lsta)):
+        dc_str_a[xa] = ",".join([str(u) for u in lsta[xa]])
+    dc_str_b = dict()
+    for xb in range(len(lstb)):
+        dc_str_b[xb] = ",".join([str(u) for u in lstb[xb]])
+    
+    dfa["paired_alphas"] = dfa["index"].apply(lambda x: dc_str_a[x])
+    dfb["paired_betas"] = dfb["index"].apply(lambda x: dc_str_b[x])
+
+    dfa["nb_paired_betas"] = dfa.paired_betas.apply(lambda x: len(x.split(",")))
+    dfa["nb_paired_alphas"] = dfa.paired_alphas.apply(lambda x: len(x.split(",")))
+    dfb["nb_paired_betas"] = dfb.paired_betas.apply(lambda x: len(x.split(",")))
+    dfb["nb_paired_alphas"] = dfb.paired_alphas.apply(lambda x: len(x.split(",")))
+
+    dfa.to_csv(filename_a, sep="\t")
+    dfb.to_csv(filename_b, sep="\t")
+
+    print("Start to re-create cells")
+
+    ## Create graph
+    graph = {}
+    N = len(dfa)
+    # for x in np.array([dfaa.index_1.values, dfaa.index_2.values]).transpose():
+    #     tple = ((x[0], x[1]) if x[0] < x[1] else (x[1], x[0]))
+    #     if(x[0] in graph):
+    #         graph[x[0]].add(x[1])
+    #     else:
+    #         graph[x[0]] = {x[0], x[1]}
+    #     if(x[1] in graph):
+    #         graph[x[1]].add(x[0])
+    #     else:
+    #         graph[x[1]] = {x[0], x[1]}
+
+    for x in np.array([dfbb.index_1.values, dfbb.index_2.values]).transpose():
+        tple = ((x[0]+N, x[1]+N) if x[0] < x[1] else (x[1], x[0]))
+        if(x[0]+N in graph):
+            graph[x[0]+N].add(x[1]+N)
+        else:
+            graph[x[0]+N] = {x[0]+N, x[1]+N}
+        if(x[1]+N in graph):
+            graph[x[1]+N].add(x[0]+N)
+        else:
+            graph[x[1]+N] = {x[0]+N, x[1]+N}
+
+    for x in np.array([dfab.index_1.values, dfab.index_2.values]).transpose():
+        tple = (x[0], x[1] + N)
+        if(x[0] in graph):
+            graph[x[0]].add(x[1]+N)
+        else:
+            graph[x[0]] = {x[0], x[1]+N}
+        if(x[1]+N in graph):
+            graph[x[1]+N].add(x[0])
+        else:
+            graph[x[1]+N] = {x[0], x[1]+N}
+
+
+    nb_tot_cells = 0
+    with open(filename_output, 'w') as fw:
+        for component in connected_components(graph):
+            c = list(set(component))
+            fw.write(",".join(
+                [("b"+str(u-N) if u > N else "a" + str(u)) for u in c]) + "\n")
+            nb_tot_cells += 1
+
+    print("Total number of cells : {}".format(nb_tot_cells))
+
+
+def write_pairs(filename_1, filename_2, filename_pairs,
+                filename_out, cutoff=None):
+    """ Write the pairs found in filename_out
+        For sequences of identical type, apply a cutoff to remove "pairs of one"
+    """
+    
+    # Read files
+    df1 = pd.read_csv(filename_1, sep="\t", index_col=False)
+    df2 = pd.read_csv(filename_2, sep="\t", index_col=False)
+    df1.set_index('index', inplace=True)
+    df2.set_index('index', inplace=True)
+
+    list_pairs_1 = []
+    list_pairs_2 = []
+    with open(filename_pairs, 'r') as f:
+        for line in f:
+            idx1, idx2 = [int(u) for u in line.strip().split()]
+            list_pairs_1.append(idx1)
+            list_pairs_2.append(idx2)
+
+    df1['idx'] = df1.index
+    df2['idx'] = df2.index
+            
+    df_pairs_1 = df1.loc[list_pairs_1]
+    df_pairs_2 = df2.loc[list_pairs_2]
+
+    df_pairs_1.reset_index(inplace=True)
+    df_pairs_2.reset_index(inplace=True)
+ 
+    
+    df_pairs = df_pairs_1.join(df_pairs_2, lsuffix="_1", rsuffix="_2")
+    df_pairs["distance"] = df_pairs.apply(lambda s: editdistance.eval(
+        s.sequence_1, s.sequence_2), axis=1)
+    df_pairs["nb_wells_shared"] = df_pairs.apply(lambda s: sum(
+        [x==y=="1" for x,y in zip(s.short_wells_1, s.short_wells_2)]), axis=1)
+    W = len(df_pairs.short_wells_1[0])
+
+    df_pairs["log10_p_value"] = df_pairs.apply(lambda s: log10pvalue(
+        s.nb_wells_shared, s.nb_wells_1, s.nb_wells_2, W), axis=1)
+
+    # if same type of sequences, remove fake pairs
+    if(filename_1 == filename_2):
+        if(cutoff == None):
+            
+            import seaborn as sns
+            import matplotlib.pyplot as plt
+            
+            sns.distplot(df_pairs.distance)
+            plt.show()
+            print("Type in the value of the distance cut-off (pairs"
+            "of sequences at a distance strictly lower than the cutoff"
+            "will be removed):\n")
+            cutoff = int(input())
+        df_pairs = df_pairs[df_pairs.distance >= cutoff]
+
+    df_pairs.to_csv(filename_out, sep="\t")
+    
+
+def main():
+    """ Parse the arguments
+    """
+    parser = argparse.ArgumentParser(
+        description="Re-create the cells")
+    parser.add_argument("filename_a", type=str,
+                        help="List of all sequences of type alpha")
+    parser.add_argument("filename_b", type=str,
+                        help="List of all sequences of type beta")
+    parser.add_argument("filename_pairs_ab", type=str,
+                        help="List of all pairs alpha-beta")
+    parser.add_argument("filename_pairs_aa", type=str,
+                        help="List of all pairs alpha-alpha")
+    parser.add_argument("filename_pairs_bb", type=str,
+                        help="List of all pairs beta-beta")
+    parser.add_argument("output", type=str, help="Output file")
+    parser.add_argument("-c", "--cutoff", type=float, default=None,
+                        help=("Pairs of sequences whose distance is below"
+                        "this threeshold will be rejected. When not given, "
+                        "the program will ask explicitely for the cutoff"))
+
+    args = parser.parse_args()
+
+    print("Write the full pairs files")
+    write_pairs(args.filename_a, args.filename_b,
+                args.filename_pairs_ab, args.filename_pairs_ab)
+    write_pairs(args.filename_a, args.filename_a,
+                args.filename_pairs_aa, args.filename_pairs_aa, args.cutoff)
+    write_pairs(args.filename_b, args.filename_b,
+                args.filename_pairs_bb, args.filename_pairs_bb, args.cutoff)
+    
+    write_cells(args.filename_a, args.filename_b,
+                args.filename_pairs_ab, args.filename_pairs_aa,
+                args.filename_pairs_bb, args.output)
+
+
+if __name__ == "__main__":
+    main()
