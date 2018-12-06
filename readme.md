@@ -17,7 +17,7 @@ The final results of the pairing algorithm, as well as some data needed for the 
 
 ## Analysis and generation of the figures of the paper
 
-The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes/` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
+The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes/` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+). They can be displayed (but not run) by github. 
 
 More precisely:
 - `correlations_VJ.ipynb`: Contains the correlations between the V and J genes fragments for the different pairings, as well as the model used to model them. 
