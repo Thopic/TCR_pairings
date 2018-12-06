@@ -1,11 +1,13 @@
 # Supplementary to the paper "Genesis of αβ T-cell receptor"
 
-[https://www.biorxiv.org/content/early/2018/06/28/353128](Link to the paper (biorxiv))
+This github is the companion of the paper entitled "Genesis of αβ T-cell receptor".
+
+[Link to the paper (biorxiv)](https://www.biorxiv.org/content/early/2018/06/28/353128)
 
 
 ## Data 
 
-We use the data obtained in the paper [Howie et al.](https://www.ncbi.nlm.nih.gov/pubmed/26290413). Their dataset is accessible at [this adress](http://s3-us-west-2.amazonaws.com/publishedproject-supplements/howie-2015-pairseq/index.html). 
+We use the data obtained in the paper [Howie et al](https://www.ncbi.nlm.nih.gov/pubmed/26290413). Their dataset is accessible at [this adress](http://s3-us-west-2.amazonaws.com/publishedproject-supplements/howie-2015-pairseq/index.html). 
 
 
 
