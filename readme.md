@@ -13,6 +13,22 @@ We use the data obtained in the paper [Howie et al](https://www.ncbi.nlm.nih.gov
 
 The final results of the pairing algorithm, as well as some data needed for the analysis can be found in the `Data/` folder. 
 
+
+
+## Analysis and generation of the figure of the paper
+
+The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes/` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
+
+More precisely:
+- `correlations_VJ.ipynb`: Contains the correlations between the V and J genes fragments for the different pairings, as well as the model used to model them. 
+- `distances_entropies.ipynb`: Describes the distribution of CDR3's length for different type of sequences
+- `mutual_information.ipynb`: Computes the mutual information between the different features, and analyse the difference with the null. Also contains the selection model described in Methods.
+- `pgen_distributions.ipynb`: Contains the probability of generation distribution for different types of sequences. The probability of generation are already computed in `../Datas/Pgen`, but they can be reobtained using [IGoR](https://github.com/qmarcou/IGoR) if needed. 
+- `proba_recombination.ipynb`: Generates the figures used in "Probability of recombination of ..." and "Fraction of cells with ...". 
+- `proportion_shared_beta`: Show the proportion of shared betas.
+- `sharing.ipynb`: Compute the selection factors, the number of sequences shared between individuals, the number of beta present in multiple clonotypes... Warning, generated sequences not included for size reasons. To obtain those one needs to download/install [IGoR](https://github.com/qmarcou/IGoR) and follow the instructions in the notebook.
+
+
 ## Pairing algorithm
 
 The code use a variation on the PairSeq algorithm of [Howie et al.](https://www.ncbi.nlm.nih.gov/pubmed/26290413). It's contained in the `src/` folder.
@@ -75,18 +91,3 @@ awk -F"\t" 'BEGIN {OFS = FS} {print $1,$NF}' sequences_beta.tsv > TCRB_short.tsv
 ``` bash
 rm TCR*; rm TCR*;
 ```
-
-
-## Analysis and generation of the figure of the paper
-
-The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes/` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
-
-More precisely:
-- `correlations_VJ.ipynb`: Contains the correlations between the V and J genes fragments for the different pairings, as well as the model used to model them. 
-- `distances_entropies.ipynb`: Describes the distribution of CDR3's length for different type of sequences
-- `mutual_information.ipynb`: Computes the mutual information between the different features, and analyse the difference with the null. Also contains the selection model described in Methods.
-- `pgen_distributions.ipynb`: Contains the probability of generation distribution for different types of sequences. The probability of generation are already computed in `../Datas/Pgen`, but they can be reobtained using [IGoR](https://github.com/qmarcou/IGoR) if needed. 
-- `proba_recombination.ipynb`: Generates the figures used in "Probability of recombination of ..." and "Fraction of cells with ...". 
-- `proportion_shared_beta`: Show the proportion of shared betas.
-- `sharing.ipynb`: Compute the selection factors, the number of sequences shared between individuals, the number of beta present in multiple clonotypes... Warning, generated sequences not included for size reasons. To obtain those one needs to download/install [IGoR](https://github.com/qmarcou/IGoR) and follow the instructions in the notebook.
-
