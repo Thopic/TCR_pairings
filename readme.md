@@ -1,10 +1,21 @@
-# Supplementary to the paper "Genesis of $\alpha$ $\beta$ T-cell receptor
+# Supplementary to the paper "Genesis of αβ T-cell receptor"
 
-[https://www.biorxiv.org/content/early/2018/06/28/353128](Link to the paper (biorxiv)
+[https://www.biorxiv.org/content/early/2018/06/28/353128](Link to the paper (biorxiv))
 
-## Find the pairs using a variation on PairSeq
 
-CPU and memory expensive, can be skipped if you are only interested in the data analysis.
+## Data 
+
+We use the data obtained in the paper [https://www.ncbi.nlm.nih.gov/pubmed/26290413](Howie et al.). Their dataset is accessible at [http://s3-us-west-2.amazonaws.com/publishedproject-supplements/howie-2015-pairseq/index.html.](this adress). 
+
+
+
+The final results of the pairing algorithm, as well as some data needed for the analysis can be found in the `Data/` repertory. 
+
+## Pairing algorithm
+
+The code use a variation on the PairSeq algorithm of [https://www.ncbi.nlm.nih.gov/pubmed/26290413](Howie et al.). 
+
+This part is CPU and memory expensive, can be skipped if you are only interested in the data analysis.
 Necessit a recent version of Python 3.x and numpy/scipy
 
 For a given experiment, in the current directory, 
@@ -64,6 +75,16 @@ rm TCR*; rm TCR*;
 ```
 
 
-## Analysis of the results
+## Analysis and generation of the figure of the paper
 
-The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the folder Notes.
+The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
+
+More precisely:
+- `correlations_VJ.ipynb`: Contains the correlations between the V and J genes fragments for the different pairings, as well as the model used to model them. 
+- `distances_entropies.ipynb`: Describes the distribution of CDR3's length for different type of sequences
+- `mutual_information.ipynb`: Computes the mutual information between the different features, and analyse the difference with the null. Also contains the selection model described in Methods.
+- `pgen_distributions.ipynb`: Contains the probability of generation distribution for different types of sequences. The probability of generation are already computed in `../Datas/Pgen`, but they can be reobtained using [https://github.com/qmarcou/IGoR](IGoR) if needed. 
+- `proba_recombination.ipynb`: Generates the figures used in "Probability of recombination of ..." and "Fraction of cells with ...". 
+- `proportion_shared_beta`: Show the proportion of shared betas.
+- `sharing.ipynb`: Compute the selection factors, the number of sequences shared between individuals, the number of beta present in multiple clonotypes... Warning, generated sequences not included for size reasons. To obtain those one need to download/install [https://github.com/qmarcou/IGoR](IGoR) and follow the instructions in the notebook.
+
