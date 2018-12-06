@@ -1,6 +1,6 @@
 # Supplementary to the paper "Genesis of αβ T-cell receptor"
 
-This github is the companion of the paper entitled "Genesis of αβ T-cell receptor".
+This github is the companion to the paper entitled "Genesis of αβ T-cell receptor".
 
 [Link to the paper (biorxiv)](https://www.biorxiv.org/content/early/2018/06/28/353128)
 
@@ -11,11 +11,11 @@ We use the data obtained in the paper [Howie et al](https://www.ncbi.nlm.nih.gov
 
 
 
-The final results of the pairing algorithm, as well as some data needed for the analysis can be found in the `Data/` repertory. 
+The final results of the pairing algorithm, as well as some data needed for the analysis can be found in the `Data/` folder. 
 
 ## Pairing algorithm
 
-The code use a variation on the PairSeq algorithm of [Howie et al.](https://www.ncbi.nlm.nih.gov/pubmed/26290413). 
+The code use a variation on the PairSeq algorithm of [Howie et al.](https://www.ncbi.nlm.nih.gov/pubmed/26290413). It's contained in the `src/` folder.
 
 This part is CPU and memory expensive, can be skipped if you are only interested in the data analysis.
 Necessit a recent version of Python 3.x and numpy/scipy
@@ -79,7 +79,7 @@ rm TCR*; rm TCR*;
 
 ## Analysis and generation of the figure of the paper
 
-The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
+The different figures appearing in the paper and their generating code can be found in the *.ipynb (python notebook) files in the `Notes/` folder. All notebooks are jupyter notebooks and work with Python 3.6+ (and probably 3+).
 
 More precisely:
 - `correlations_VJ.ipynb`: Contains the correlations between the V and J genes fragments for the different pairings, as well as the model used to model them. 
