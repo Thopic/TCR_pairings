@@ -240,8 +240,8 @@ def main():
     parser.add_argument("output", type=str, help="Output file")
     parser.add_argument("-c", "--cutoff", type=float, default=None,
                         help=("Pairs of sequences whose distance is below"
-                        "this threeshold will be rejected. When not given, "
-                        "the program will ask explicitely for the cutoff"))
+                              "this threeshold will be rejected. When not given, "
+                              "the program will ask explicitely for the cutoff"))
 
     args = parser.parse_args()
 
